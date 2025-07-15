@@ -28,8 +28,14 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { Label } from "@/components/ui/label"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import { toast } from "sonner"
-import { Heart, MessageCircle, Search, Share2, Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
+import { Clock, TrendingUp, Heart, MessageCircle, Search, Share2, Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react"
 
 interface Post {
   userId: number
@@ -409,121 +415,141 @@ export default function Component() {
       </CommandDialog>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="relative container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Page Title */}
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Latest Posts</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">Browse and manage posts from JSONPlaceholder API</p>
-          </div>
+          <div className="text-center mb-12 space-y-8">
+            <div className="space-y-6">
+              <h2 className="text-4xl font-bold text-slate-900 mb-4">Latest Posts</h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">Browse and manage posts from JSONPlaceholder API</p>
+            </div>
 
-          {/* Posts Grid */}
-          <div className="grid gap-6">
-            {posts.map((post) => {
-              const user = getUserById(post.userId)
-              const likes = generateLikes(post.id)
-              const commentCount = generateCommentCount(post.id)
+            {/* Posts Grid */}
+            <Tabs defaultValue="latest">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="latest">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Latest
+                </TabsTrigger>
+                <TabsTrigger value="popular">
+                  <Heart className="h-4 w-4 mr-2" />
+                  Popular
+                </TabsTrigger>
+                <TabsTrigger value="trending">
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Trending
+                </TabsTrigger>
+            </TabsList>
+            <TabsContent value="latest">
+              <div className="grid gap-6">
+                {posts.map((post) => {
+                  const user = getUserById(post.userId)
+                  const likes = generateLikes(post.id)
+                  const commentCount = generateCommentCount(post.id)
 
-              return (
-                <Card
-                  key={post.id}
-                  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-white border-slate-200"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="secondary" className="bg-slate-100 text-slate-700">
-                        Post #{post.id}
-                      </Badge>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewPost(post)}
-                          className="text-slate-600 hover:text-blue-600"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditPost(post)}
-                          className="text-slate-600 hover:text-green-600"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-red-600">
-                              <Trash2 className="h-4 w-4" />
+                  return (
+                    <Card
+                      key={post.id}
+                      className="overflow-hidden hover:shadow-lg transition-shadow duration-300 bg-white border-slate-200"
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="secondary" className="bg-slate-100 text-slate-700">
+                            Post #{post.id}
+                          </Badge>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewPost(post)}
+                              className="text-slate-600 hover:text-blue-600"
+                            >
+                              <Eye className="h-4 w-4" />
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the post "
-                                {post.title.slice(0, 50)}...".
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deletePost(post.id)}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-semibold text-slate-900 hover:text-slate-700 cursor-pointer transition-colors line-clamp-2">
-                      {post.title}
-                    </h3>
-                  </CardHeader>
-                  <CardContent className="pb-4">
-                    <p className="text-slate-600 leading-relaxed mb-4 line-clamp-3">{post.body}</p>
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-slate-200 text-slate-700 text-sm">
-                          {user?.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("") || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{user?.name || "Unknown User"}</p>
-                        <p className="text-xs text-slate-500">@{user?.username || "unknown"}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-0">
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center space-x-4">
-                        <Button variant="ghost" size="sm" className="text-slate-600 hover:text-red-600">
-                          <Heart className="h-4 w-4 mr-1" />
-                          {likes}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-slate-600 hover:text-blue-600"
-                          onClick={() => handleViewPost(post)}
-                        >
-                          <MessageCircle className="h-4 w-4 mr-1" />
-                          {commentCount}
-                        </Button>
-                      </div>
-                      <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              )
-            })}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditPost(post)}
+                              className="text-slate-600 hover:text-green-600"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="text-slate-600 hover:text-red-600">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the post "
+                                    {post.title.slice(0, 50)}...".
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deletePost(post.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                        <h3 className="text-xl font-semibold text-slate-900 hover:text-slate-700 cursor-pointer transition-colors line-clamp-2">
+                          {post.title}
+                        </h3>
+                      </CardHeader>
+                      <CardContent className="pb-4">
+                        <p className="text-slate-600 leading-relaxed mb-4 line-clamp-3">{post.body}</p>
+                        <div className="flex items-center space-x-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-slate-200 text-slate-700 text-sm">
+                              {user?.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("") || "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium text-slate-900">{user?.name || "Unknown User"}</p>
+                            <p className="text-xs text-slate-500">@{user?.username || "unknown"}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="pt-0">
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center space-x-4">
+                            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-red-600">
+                              <Heart className="h-4 w-4 mr-1" />
+                              {likes}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-slate-600 hover:text-blue-600"
+                              onClick={() => handleViewPost(post)}
+                            >
+                              <MessageCircle className="h-4 w-4 mr-1" />
+                              {commentCount}
+                            </Button>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900">
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  )
+                })}
+              </div>
+            </TabsContent>
+            </Tabs>
           </div>
 
           {/* Load More Button */}
